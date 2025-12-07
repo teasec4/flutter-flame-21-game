@@ -11,10 +11,10 @@ class HandContainer extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
-    _layout();
+    layout();
   }
 
-  void _layout() {
+  void layout() {
     removeAll(children);
 
     double x = 0;
@@ -49,6 +49,6 @@ class HandContainer extends PositionComponent {
 
   void addCard(Sprite sprite) {
     cardsSprites.add(sprite);
-    _layout();
+    layout();
   }
 }
