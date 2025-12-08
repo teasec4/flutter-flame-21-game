@@ -10,12 +10,13 @@ class HandContainer extends PositionComponent {
 
   HandContainer({this.gap = 20.0, this.isBot = false});
 
-  @override
-  Future<void> onLoad() async {
-    // layout();
-  }
+  // @override
+  // Future<void> onLoad() async {
+  //   layout();
+  // }
 
   void layout() {
+    print('Layout called, cards count: ${cardsSprites.length}');
     removeAll(children);
 
     double x = 0;

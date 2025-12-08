@@ -1,16 +1,12 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:gambling_game/game/components/hand_container.dart';
 import 'package:gambling_game/game/logic/cards.dart';
 import 'package:gambling_game/game/logic/models/card.dart';
+import 'package:gambling_game/game/logic/player.dart';
 
-class Bot {
-  Cards cards;
-  Bot({required this.cards});
-
-  CardM takeCard(){
-    final (row, col, index) = Cards.getRandomRowCol();
-    final randomCard = cards.getRandomSuit().getCard(row, col);
-
-    return CardM(card: randomCard, index: index);
-  }
+class Bot extends Player{
+  Bot({required Cards cards, required HandContainer handContainer}) : super(cards: cards, handContainer: handContainer, isBot: true);
 
 }
