@@ -6,12 +6,13 @@ import 'package:gambling_game/game/components/card_component.dart';
 class HandContainer extends PositionComponent {
   final List<Sprite> cardsSprites = [];
   final double gap;
+  final bool isBot;
 
-  HandContainer({this.gap = 20.0,});
+  HandContainer({this.gap = 20.0, this.isBot = false});
 
   @override
   Future<void> onLoad() async {
-    layout();
+    // layout();
   }
 
   void layout() {
@@ -26,13 +27,18 @@ class HandContainer extends PositionComponent {
 
 
       if (i == cardsSprites.length - 1) {
-        card.position = Vector2(x, -150);
+        if (isBot) {
+          card.position = Vector2(x, 150);  // начинает снизу
+        } else {
+          card.position = Vector2(x, -150);  // начинает сверху
+        }
         card.add(
           MoveToEffect(
             Vector2(x, 0),
             EffectController(duration: 0.5),
           ),
         );
+
       } else {
         card.position = Vector2(x, 0);
       }
@@ -49,6 +55,7 @@ class HandContainer extends PositionComponent {
 
   void addCard(Sprite sprite) {
     cardsSprites.add(sprite);
+    print('Cards count: ${cardsSprites.length}');
     layout();
   }
 }

@@ -9,26 +9,22 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:gambling_game/game/components/background_component.dart';
 import 'package:gambling_game/game/components/balance_component.dart';
-import 'package:gambling_game/game/components/btn_get_card.dart';
+import 'package:gambling_game/game/logic/bot.dart';
+import 'package:gambling_game/game/ui/overlays/btn_get_card.dart';
 import 'package:gambling_game/game/components/card_component.dart';
 import 'package:gambling_game/game/components/card_sheet.dart';
 import 'package:gambling_game/game/components/hand_container.dart';
 import 'package:gambling_game/game/logic/blackjack_rules.dart';
+import 'package:gambling_game/game/logic/cards.dart';
+import 'package:gambling_game/game/ui/overlays/imdone_button.dart';
+import 'package:gambling_game/game/ui/overlays/restart_button.dart';
 
 class GamblingGame extends FlameGame {
 
 
   @override
   Future<void> onLoad() async{
-    final clubs = await CardSheet().load("Clubs-88x124.png");
-    final hearts = await CardSheet().load("Hearts-88x124.png");
-    final spades = await CardSheet().load("Spades-88x124.png");
-    final diamonds = await CardSheet().load("Diamonds-88x124.png");
-
-    // take a card fo test
-    final sprite = clubs.getCard(0,0);
-    final sprite2 = clubs.getCard(2,2);
-
+    final cards = await Cards.init();
 
     // creating background
     add(BackgroundComponent()
@@ -38,90 +34,92 @@ class GamblingGame extends FlameGame {
     // create a Balance on top left corner
     add(BalanceComponent());
 
-    // create a HandContainer on bottom center
+    // create a HandContainer on bottom center for PLAYER
     final hand = HandContainer()
     ..size = Vector2(size.x, 150)
     ..position = Vector2(size.x / 2, size.y * 0.8);
     add(hand);
 
+    // create a HandContainer no top center for BOT
+    final handBot = HandContainer(isBot: true)
+      ..size = Vector2(size.x, 150)
+      ..position = Vector2(size.x/2, size.y * 0.2);
+    add(handBot);
+
     // sum of card index
     List<int> cardIndices = [];
+    List<int> botScore = [];
     var sum = 0;
+    var sumBot = 0;
 
+    // PLAYER SCORE
     final sumText = TextComponent(
       text: "$sum",
       anchor: Anchor.topCenter,
-      position: Vector2(size.x/2, 100),
+      position: Vector2(size.x/2, 600),
     );
     add(sumText);
 
-    final btn = BtnGetCard(
-        onPressed: () {
-          final random = Random();
-          final suits = [clubs, hearts, spades, diamonds];
-          final randomSuit = suits[random.nextInt(4)];
-
-          final randomRow = random.nextInt(3);
-          var randomCol = 0;
-          if (randomRow == 2){
-             randomCol = random.nextInt(3);
-          } else {
-            randomCol = random.nextInt(5);
-          }
-
-          final randomCard = randomSuit.getCard(randomRow, randomCol);
-          hand.addCard(randomCard);
-
-          final int index = randomRow * 5 + randomCol;
-          cardIndices.add(index);
-          sum = BlackjackRules.calculateHandValue(cardIndices);
-          sumText.text = "$sum";
-        }
+    // BOT SCORE
+    final sumTextBot = TextComponent(
+      text: "$sumBot",
+      anchor: Anchor.topCenter,
+      position: Vector2(size.x/2, 300),
     );
-    // create a btn test
-    add(btn);
+    add(sumTextBot);
 
-    // Рядом с BtnGetCard
-    final btnRestart = HudMarginComponent(
-      margin: const EdgeInsets.only(right: 20, top: 50),
-      anchor: Anchor.topRight,
-      size: Vector2(150,50),
-    );
-    btnRestart.add(
-      ButtonComponent(
-        button: RectangleComponent(
-          size: Vector2(150,50),
-          paint: Paint()..color = const Color(0xFF333333),
-          anchor: Anchor.topLeft,
-        ),
-        buttonDown: RectangleComponent(
-          size: Vector2(150,50),
-          paint: Paint()..color = const Color(0xFF555555),
-          anchor: Anchor.topLeft,
-        ),
-        position: Vector2.zero(),
-        onPressed: () {
-          // Рестарт игры
-          cardIndices.clear();
-          sum = 0;
-          sumText.text = "0";
-          hand.cardsSprites.clear();
-          hand.layout();
-        },
-      ),
-    );
-    btnRestart.add(
-      TextComponent(
-        text: "Restart",
-        anchor: Anchor.center,
-        position: Vector2(75, 25),
-        textRenderer: TextPaint(
-          style: const TextStyle(color: Colors.white, fontSize: 20),
-        ),
-      ),
-    );
-    add(btnRestart);
 
+    // GET CARD
+    add(BtnGetCard(onPressed: (){
+      final (row , col, index) = Cards.getRandomRowCol();
+      final randomCard = cards.getRandomSuit().getCard(row, col);
+
+      hand.addCard(randomCard);
+      cardIndices.add(index);
+
+      sum = BlackjackRules.calculateHandValue(cardIndices);
+      sumText.text = "$sum";
+    }));
+
+    // RESTART
+    add(RestartButton(onPressed: (){
+      cardIndices.clear();
+      sum = 0;
+      sumText.text = "0";
+      hand.cardsSprites.clear();
+      hand.layout();
+
+      sumBot = 0;
+      sumTextBot.text = "0";
+      handBot.cardsSprites.clear();
+      handBot.layout();
+    }));
+
+    final bot = Bot(cards: cards);
+    Future<void> botPlayingGameLogic() async{
+      // take a first card
+      final firstTake = bot.takeCard();
+      handBot.addCard(firstTake.card);
+      botScore.add(firstTake.index);
+      sumBot = BlackjackRules.calculateHandValue(botScore);
+      sumTextBot.text = "$sumBot";
+
+      await Future.delayed(Duration(milliseconds: 500));
+
+
+      // take a second card
+      final secondTake = bot.takeCard();
+      handBot.addCard(secondTake.card);
+      botScore.add(secondTake.index);
+      sumBot = BlackjackRules.calculateHandValue(botScore);
+      sumTextBot.text = "$sumBot";
+    }
+
+
+    // Bot Tern Btn
+    add(ImdoneButton(onPressed: ()async{
+       await botPlayingGameLogic();
+    }));
 
 
 
