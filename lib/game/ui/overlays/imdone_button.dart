@@ -31,7 +31,7 @@ class ImdoneButton extends PositionComponent with HasGameReference<GamblingGame>
 
     // текст нужно добавлять КАК ОТДЕЛЬНЫЙ КОМПОНЕНТ
     final text = TextComponent(
-      text: "I'm done!",
+      text: "Stand",
       anchor: Anchor.center,
       position: size / 2,       // ← центр кнопки
       priority: 1,              // ← чтобы был выше прямоугольника

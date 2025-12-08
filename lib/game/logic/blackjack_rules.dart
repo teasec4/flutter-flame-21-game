@@ -1,3 +1,5 @@
+enum GameResult{playerWins, botWins, draw}
+
 class BlackjackRules {
 
   static int calculateHandValue(List<int> cardIndices) {
@@ -27,5 +29,19 @@ class BlackjackRules {
   static bool isBust(List<int> cardIndices) {
     return calculateHandValue(cardIndices) > 21;
   }
+
+  static GameResult determineWinner(int playerScore, int botScore) {
+    final playerBust = playerScore > 21;
+    final botBust = botScore > 21;
+
+    if (playerBust && botBust) return GameResult.draw;
+    if (playerBust) return GameResult.botWins;
+    if (botBust) return GameResult.playerWins;
+
+    if (playerScore > botScore) return GameResult.playerWins;
+    if (botScore > playerScore) return GameResult.botWins;
+    return GameResult.draw;
+  }
+
 
 }

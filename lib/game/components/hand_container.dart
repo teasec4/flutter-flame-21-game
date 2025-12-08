@@ -16,7 +16,6 @@ class HandContainer extends PositionComponent {
   // }
 
   void layout() {
-    print('Layout called, cards count: ${cardsSprites.length}');
     removeAll(children);
 
     double x = 0;
@@ -56,7 +55,6 @@ class HandContainer extends PositionComponent {
 
   void addCard(Sprite sprite) {
     cardsSprites.add(sprite);
-    print('Cards count: ${cardsSprites.length}');
     layout();
   }
 }

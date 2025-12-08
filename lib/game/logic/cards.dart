@@ -1,15 +1,20 @@
 import 'dart:math';
-
 import 'package:flame/components.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/sprite.dart';
-import 'package:gambling_game/game/components/card_sheet.dart';
+
+class CardModel {
+  Sprite sprite;
+  int index;
+  CardModel({required this.sprite, required this.index});
+}
 
 
 class Cards {
-   late final CardSheet clubs;
-   late final CardSheet hearts;
-   late final CardSheet spades;
-   late final CardSheet diamonds;
+  late final SpriteSheet clubsSheet;
+  late final SpriteSheet heartsSheet;
+  late final SpriteSheet spadesSheet;
+  late final SpriteSheet diamondsSheet;
 
   static const Map<String, String> mapOfCards = {
     "clubs" : "Clubs-88x124.png",
@@ -22,19 +27,41 @@ class Cards {
 
   static Future<Cards> init() async{
     final cards = Cards._();
-    cards.clubs = await CardSheet().load(mapOfCards['clubs']!);
-    cards.hearts = await CardSheet().load(mapOfCards['hearts']!);
-    cards.spades = await CardSheet().load(mapOfCards['spades']!);
-    cards.diamonds = await CardSheet().load(mapOfCards['diamonds']!);
+    for (var entry in mapOfCards.entries) {
+      final image = await Flame.images.load(entry.value);
+      final sheet = SpriteSheet(
+        image: image,
+        srcSize: Vector2(88, 124),
+      );
+
+      switch (entry.key) {
+        case 'clubs':
+          cards.clubsSheet = sheet;
+        case 'hearts':
+          cards.heartsSheet = sheet;
+        case 'spades':
+          cards.spadesSheet = sheet;
+        case 'diamonds':
+          cards.diamondsSheet = sheet;
+      }
+    }
     return cards;
+
+  }
+
+  CardModel getRandomCard() {
+    final (row, col, index) = getRandomRowCol();
+    final suit = getRandomSuit();
+    final sprite = suit.getSprite(row, col);
+    return CardModel(sprite: sprite, index: index);
   }
 
   // random pick a Suit of card (SpriteSheet)
-   CardSheet getRandomSuit(){
+   SpriteSheet getRandomSuit(){
     final random = Random();
-    final suits = [clubs, hearts, spades, diamonds];
-    final randomSuit = suits[random.nextInt(4)];
-    return randomSuit;
+    final suits = [clubsSheet, heartsSheet, spadesSheet, diamondsSheet];
+    return suits[random.nextInt(4)];
+
   }
 
   // for take it up from sprite sheet

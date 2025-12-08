@@ -1,9 +1,9 @@
-import 'package:flame/components.dart';
+
 import 'package:gambling_game/game/components/hand_container.dart';
-import 'package:gambling_game/game/gambling_game.dart';
+
 import 'package:gambling_game/game/logic/blackjack_rules.dart';
 import 'package:gambling_game/game/logic/cards.dart';
-import 'package:gambling_game/game/logic/models/card.dart';
+
 
 class Player{
   Cards cards;
@@ -11,17 +11,19 @@ class Player{
   final bool isBot;
   List<int> indexScore = [];
   int totalScore = 0;
+  int money = 100;
 
   Player({required this.cards, required this.handContainer, this.isBot = false});
 
   void takeCard2(){
-    final (row, col, index) = Cards.getRandomRowCol();
-    final card = cards.getRandomSuit().getCard(row, col);
-    handContainer.addCard(card);
-    addIndexScore(index);
+    final card = cards.getRandomCard();
+    handContainer.addCard(card.sprite);
+    addIndexScore(card.index);
     totalScore = BlackjackRules.calculateHandValue(indexScore);
-  }
+    print('indexScore list: $indexScore');
+    print('Calculated total: $totalScore');
 
+  }
 
   void addIndexScore(int score){
     indexScore.add(score);
